@@ -122,6 +122,55 @@ app.patch("/toggleItemSelection/:listId/:itemId", async (req, res) => {
     }
 });
 
+app.delete("/deleteItem/:listId/:itemId", async (req, res) => {
+    const { listId, itemId } = req.params;
+
+    try {
+        const list = await ItemsModel.findById(listId); // Find the list by ID
+        if (!list) {
+            return res.status(404).send("List not found");
+        }
+        
+        // Find the item index using the itemId
+        const itemIndex = list.items.findIndex(item => item._id.toString() === itemId);
+        if (itemIndex === -1) {
+            return res.status(404).send("Item not found in list");
+        }
+
+        // Remove the item from the array
+        list.items.splice(itemIndex, 1);
+
+        // Save the updated list
+        const updatedList = await list.save();
+        res.json(updatedList);
+    } catch (error) {
+        res.status(500).send("Error deleting item: " + error.message);
+    }
+});
+
+app.patch("/updateListName/:listId", async (req, res) => {
+    const { listId } = req.params;
+    const { listName } = req.body; // Get the new list name from the request body
+
+    try {
+        const updatedList = await ItemsModel.findByIdAndUpdate(
+            listId,
+            { $set: { listName: listName } },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedList) {
+            return res.status(404).send("List not found");
+        }
+
+        res.json(updatedList);
+    } catch (error) {
+        res.status(500).send("Error updating list name: " + error.message);
+    }
+});
+
+
+
 
 
 app.listen(3001, () => console.log("Server started on port 3001"));

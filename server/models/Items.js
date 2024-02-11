@@ -20,7 +20,7 @@ const ItemsSchema = new mongoose.Schema({
             type: Number,
             required: true,
         },
-    }]
+    }],
 });
 
 const ItemsModel = mongoose.model("Items", ItemsSchema);
